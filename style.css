@@ -1,0 +1,42 @@
+
+.card {
+    max-height: 600px;
+    overflow: hidden;
+}
+
+.profile-img {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #80808059;
+}
+
+.post-img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 0;
+}
+
+#liveAlertPlaceholder {
+    z-index: 9999;
+}
+
+.add-btn {
+    position: fixed;
+    bottom: 10%;
+    right: 8%;
+    color: #fff;
+    font-size: 40px;
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    text-align: center;
+    box-shadow: 1px 4px 6px #1a1a1a;
+    cursor: pointer;
+    transition: .15s ease-in-out;
+}
+
+.add-btn:hover {
+    scale: 1.05;
+}
