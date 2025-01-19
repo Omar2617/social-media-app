@@ -1,10 +1,58 @@
-let logoutBtn = document.getElementById("logoutBtn");
-let loginBtn = document.getElementById("loginBtn");
-let registerBtn = document.getElementById("registerBtn");
-let addPostBtn = document.getElementById("addPostBtn");
+let currentPage = 1;
+let lastPage = 1;
+
+function getPosts(reload = true, page = 1) {
+    let postsContainer = document.getElementById("posts");
+    if(reload) {
+        postsContainer.innerHTML = "";
+    }
+    axios.get(`https://tarmeezacademy.com/api/v1/posts?limit=4&page=${page}`)
+    .then((response) => {
+        const data = response.data.data;
+        console.log(data);
+        lastPage = response.data.meta.last_page;
+        for(post of data) {
+            const author = post.author;
+            postsContainer.innerHTML += `
+                <!-- Post -->
+                <div class="card mb-3 mt-3 container shadow" id="post${post.id}">
+                    <div class="py-2 px-1 d-flex align-items-center">
+                        <img src="${author.profile_image}" id="profileImg" class="profile-img rounded-circle">
+                        <span id="username" class="mx-3 text-opacity-50">@${author.username}</span>
+                    </div>
+                    <img src="${post.image}" id="postImg" class="post-img card-img-top rounded">
+                    <div class="card-body">
+                        <h5 class="card-title" id="post${post.id}Title">${post.title??""}</h5>
+                        <p class="card-text" id="post${post.id}Body">${post.body??""}</p>
+                        <p class="card-text"><small class="text-body-secondary">Last updated ${post.created_at}</small></p>
+                        <div>
+                            <i class="bi bi-pen" style="cursor: pointer;"></i>
+                            <span id="commentsCount">(${post.comments_count}) Comments</span>
+                            <div id="post${post.id}Tags" class="d-inline-flex flex-wrap"></div>
+                            <div class="input-group mb-3 my-3">
+                                <input type="text" class="form-control" placeholder="Comment" aria-label="Recipient's username" aria-describedby="button-addon2">
+                                <button class="btn btn-outline-secondary" type="button" id="button-addon2">Send</button>
+                            </div>
+                            <div id="post${post.id}Comments" class="comments-container"></div>
+                        </div>
+                    </div>
+                </div>
+                <!--// Post //-->    
+            `;
+            let tagsContainer = document.getElementById(`post${post.id}Tags`);
+            for(let i = 0; i < post.tags.length; i++) {
+                tagsContainer.innerHTML += `
+                    <span class="bg-secondary p-1 m-1 rounded text-light" id="post${post.id}Tag${i}">${post.tags[i].name}</span>
+                `;
+            };
+        };
+    })
+    .catch((error) => {
+        appendAlert(error.message, "danger");
+    });
+};
 
 function login() {
-    const loginCloseBtn = document.getElementById("loginCloseBtn");
     const loginUsername = document.getElementById("loginUsername");
     const loginPassword = document.getElementById("loginPassword");
     axios.post("https://tarmeezacademy.com/api/v1/login",{
@@ -12,37 +60,21 @@ function login() {
         "password" : loginPassword.value
     })
     .then((response) => {
-        const data = response.data;
         loginUsername.value = "";
         loginPassword.value = "";
-        loginCloseBtn.click();
+        document.getElementById("loginCloseBtn").click();
+
+        const data = response.data;
+
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        appendAlert('Login is Successfully!', 'success');
-        logoutBtn.style.display = "block";
-        loginBtn.style.display = "none";
-        registerBtn.style.display = "none";
-        addPostBtn.style.display = "block";
+
+        appendAlert('Login is Successfully!', 'success');    
+        setupUi();   
     })
     .catch((error) => {
         appendAlert(error.response.data.message, 'danger');
     });
-};
-
-function appendAlert(message, type) {
-    const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = [
-    `<div class="alert alert-${type} alert-dismissible" role="alert">`,
-    `   <div>${message}</div>`,
-    '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-    '</div>'
-    ].join('');
-
-    alertPlaceholder.append(wrapper);
-    setTimeout(() => {
-        wrapper.style.display = "none";
-    }, 3000);
 };
 
 function register() {
@@ -64,19 +96,20 @@ function register() {
 
     axios.post("https://tarmeezacademy.com/api/v1/register",formData)
     .then((response) => {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        let data = response.data;
+
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
         registerUsername.value = "";
         registerName.value = "";
         registerEmail.value = "";
         registerPassword.value = "";
-        registerImage.value = "";
+        registerImage.value = ""; 
         regiserCloseBtn.click();
+
         appendAlert('Regiser is Successfully!', 'success');
-        logoutBtn.style.display = "block";
-        loginBtn.style.display = "none";
-        registerBtn.style.display = "none";
-        addPostBtn.style.display = "block";
+        setupUi();
     })
     .catch((error) => {
         appendAlert(error.response.data.message, "danger");
@@ -84,54 +117,51 @@ function register() {
 };
 
 function logout() {
-    logoutBtn.style.display = "none";
-    loginBtn.style.display = "block";
-    registerBtn.style.display = "block";
-    addPostBtn.style.display = "none";
     localStorage.clear();
+    setupUi();
 }
 
-function getPosts(limit) {
-    let postsContainer = document.getElementById("posts");
-    postsContainer.innerHTML = "";
-    axios.get(`https://tarmeezacademy.com/api/v1/posts?limit=${limit}`)
-    .then((response) => {
-        const data = response.data.data;
-        for(post of data) {
-            let author = post.author;
-            postsContainer.innerHTML += `
-                <!-- Post -->
-                <div class="card mb-3 mt-3 container shadow" id="post${post.id}">
-                    <div class="py-2 px-1 bg-white d-flex align-items-center">
-                        <img src="${author.profile_image}" id="profileImg" class="profile-img rounded-circle">
-                        <span id="username" class="mx-3 text-opacity-50">@${author.username}</span>
-                    </div>
-                    <img src="${post.image}" id="postImg" class="post-img card-img-top rounded">
-                    <div class="card-body">
-                        <h5 class="card-title" id="post${post.id}Title">${post.title??""}</h5>
-                        <p class="card-text" id="post${post.id}Body">${post.body??""}</p>
-                        <p class="card-text"><small class="text-body-secondary">Last updated ${post.created_at}</small></p>
-                        <div>
-                            <i class="bi bi-pen"></i>
-                            <span id="commentsCount">(${post.comments_count}) Comments</span>
-                            <div id="post${post.id}Tags" class="d-inline-flex flex-wrap"></div>
-                        </div>
-                    </div>
-                </div>
-                <!--// Post //-->    
-            `;
-            let tagsContainer = document.getElementById(`post${post.id}Tags`);
-            for(let i = 0; i < post.tags.length; i++) {
-                tagsContainer.innerHTML += `
-                    <span class="bg-secondary p-1 m-1 rounded text-light" id="post${post.id}Tag${i}">${post.tags.name}</span>
-                `;
-            };
-        };
-    })
-    .catch((error) => {
-        appendAlert(error.message, "danger");
-    });
-}
+function appendAlert(message, type) {
+    const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = [
+    `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+    `   <div>${message}</div>`,
+    '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+    '</div>'
+    ].join('');
+
+    alertPlaceholder.append(wrapper);
+    setTimeout(() => {
+        wrapper.style.display = "none";
+    }, 3000);
+};
+
+function setupUi() {
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loginBtn = document.getElementById("loginBtn");
+    const registerBtn = document.getElementById("registerBtn");
+    const createPostBtn = document.getElementById("createPostBtn");
+    const navImg = document.getElementById("navImg");
+    const navUsername = document.getElementById("navUsername");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
+    if(user && token) {
+        loginBtn.style.display = "none";
+        registerBtn.style.display = "none";
+        logoutBtn.style.display = "block";
+        createPostBtn.style.display = "block";
+        navImg.innerHTML = `<img  src="${user.profile_image}" class="rounded-circle" style="height: 40px; width: 40px;">`;
+        navUsername.innerHTML = `@${user.username}`;
+    } else {
+        loginBtn.style.display = "block";
+        registerBtn.style.display = "block";
+        logoutBtn.style.display = "none";
+        createPostBtn.style.display = "none";
+        navImg.innerHTML = "";
+        navUsername.innerHTML = "";
+    };
+};
 
 function createPostBtnClicked(){
     let postTitleInput = document.getElementById("postTitleInput");
@@ -151,28 +181,28 @@ function createPostBtnClicked(){
         }
     })
     .then(() => {
+        postTitleInput.value = "";
+        postBodyInput.value = "";
+        postImageInput.value = "";
+        document.getElementById("createPostCloseBtn").click();
         appendAlert("The post has been created successfully", "success"); 
-        getPosts(2);
+        getPosts();
     })
     .catch((error) => {
         appendAlert(error.response.data.message, "danger");
     });
-
-    postTitleInput.value = "";
-    postBodyInput.value = "";
-    document.getElementById("createPostCloseBtn").click();
 }
 
-document.body.onload = () => {
-    if(localStorage.getItem("token")) {
-        logoutBtn.style.display = "block";
-        loginBtn.style.display = "none";
-        registerBtn.style.display = "none";
-        addPostBtn.style.display = "block";
-    } else {
-        logoutBtn.style.display = "none";
-        addPostBtn.style.display = "none";
+window.addEventListener('scroll', () => {
+    const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight;
+
+    if (isAtBottom && currentPage < lastPage) {
+        currentPage++;
+        getPosts(false,currentPage);
     }
-}
+  });
 
-getPosts(2);
+document.addEventListener("DOMContentLoaded", () => {
+    setupUi();
+    getPosts();
+});

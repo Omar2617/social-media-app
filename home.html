@@ -23,7 +23,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="w-50 m-auto shadow rounded mt-3 navbar navbar-expand-lg bg-body-tertiary">
+    <nav class="w-75 m-auto shadow rounded mt-3 navbar navbar-expand-lg">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">Social Media</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,10 @@
             </ul>
             <button type="button" class="btn btn-outline-primary mx-1" id="loginBtn" data-bs-toggle="modal" data-bs-target="#loginModal">LOGIN</button>
             <button type="button" class="btn btn-outline-primary mx-1" id="registerBtn" data-bs-toggle="modal" data-bs-target="#registerModal">REGISTER</button>
+            <div class="profile-img-username mx-3">
+              <div id="navImg" class="d-inline"></div>
+              <b id="navUsername"></b>
+            </div>
             <button type="button" class="btn btn-outline-danger mx-1" id="logoutBtn" onclick="logout()">LOGOUT</button>
           </div>
         </div>
@@ -47,15 +51,14 @@
     <!--// Navbar //-->  
 
     <!-- Posts Container -->
-    <div id="posts" class="d-flex flex-column align-items-center mt-3 w-50 m-auto">    
-    </div>
+    <div id="posts" class="d-flex flex-column align-items-center mt-3 m-auto"></div>
     <!--// Posts Container //-->
 
-    <!-- Add Post Button -->
-    <div class="bg-primary add-btn" data-bs-toggle="modal" data-bs-target="#addPostModal" id="addPostBtn">
+    <!-- Create Post Button -->
+    <div class="bg-primary add-btn" data-bs-toggle="modal" data-bs-target="#createPostModal" id="createPostBtn">
       <i class="bi bi-plus-lg"></i>
     </div>
-    <!--// Add Post Botton //-->
+    <!--// Create Post Botton //-->
     
     <!-- Modals -->
      
@@ -129,12 +132,12 @@
       </div>        
       <!-- Register Modal -->  
        
-      <!-- Add Post Modal -->
-      <div class="modal fade" id="addPostModal" tabindex="-1" aria-labelledby="addPostModalLabel" aria-hidden="true">
+      <!-- Create Post Modal -->
+      <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="addPostModalLabel">Create New Post</h1>
+              <h1 class="modal-title fs-5" id="createPostModalLabel">Create New Post</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -160,7 +163,7 @@
           </div>
         </div>
       </div>
-      <!--// Add Post Modal //-->
+      <!--// Create Post Modal //-->
 
     <!--// Modals //-->
 
